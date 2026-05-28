@@ -1,17 +1,19 @@
 
-<!DOCTYPE html>
+                  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VICE SQUAD: Neon Blood</title>
+    <title>VICE SQUAD: Unlimited</title>
     <style>
         :root {
-            --bg-color: #0a0a0a;
-            --text-main: #d3d3d3;
+            --bg-color: #030303;
+            --text-main: #c8c8c8;
             --text-accent: #ff2a2a;
             --terminal-green: #39ff14;
             --border-color: #333;
+            --warning-color: #ffaa00;
+            --blue-accent: #44aaff;
         }
 
         body {
@@ -26,11 +28,11 @@
 
         #game-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             border: 1px solid var(--border-color);
             padding: 20px;
-            background-color: #111;
-            box-shadow: 0 0 15px rgba(255, 42, 42, 0.1);
+            background-color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(255, 42, 42, 0.1);
         }
 
         header {
@@ -53,91 +55,88 @@
         .stats {
             font-size: 1.1rem;
             color: var(--terminal-green);
+            text-align: right;
         }
 
-        .stats span {
-            font-weight: bold;
-            color: #fff;
+        .stats span { font-weight: bold; color: #fff; }
+
+        #event-panel {
+            color: var(--warning-color);
+            font-size: 0.9rem;
+            min-height: 20px;
+            margin-bottom: 15px;
+            font-style: italic;
         }
 
         #story-panel {
-            min-height: 200px;
+            min-height: 150px;
             margin-bottom: 20px;
-            line-height: 1.5;
+            line-height: 1.6;
             font-size: 1rem;
             border-left: 3px solid var(--text-accent);
             padding-left: 15px;
+            background: #111;
+            padding: 15px;
         }
 
         .evidence-log {
             margin-top: 20px;
-            padding: 10px;
-            background: #1a1a1a;
-            border: 1px solid #333;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border-color);
             font-size: 0.9rem;
-            color: #aaa;
         }
 
         .evidence-log h3 {
             margin-top: 0;
             color: var(--text-main);
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
+
+        ul { margin: 10px 0 0 0; padding-left: 20px; }
+        li { margin-bottom: 8px; }
 
         #actions-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
-        @media (max-width: 600px) {
-            #actions-panel {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 650px) {
+            #actions-panel { grid-template-columns: 1fr; }
         }
 
         button {
-            background-color: #222;
+            background-color: #151515;
             color: var(--text-main);
-            border: 1px solid var(--text-accent);
+            border: 1px solid var(--border-color);
             padding: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1rem;
+            font-family: inherit;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
             text-align: left;
         }
 
         button:hover:not(:disabled) {
-            background-color: var(--text-accent);
-            color: #000;
+            background-color: #252525;
+            border-color: var(--text-accent);
         }
 
         button:disabled {
-            border-color: #444;
-            color: #555;
+            border-color: #1a1a1a;
+            color: #444;
             cursor: not-allowed;
-            background-color: #111;
+            background-color: #050505;
         }
 
-        .cost {
-            float: right;
-            font-size: 0.85rem;
-            color: var(--terminal-green);
-        }
+        .cost { float: right; font-size: 0.85rem; color: var(--terminal-green); }
+        .sys-text { color: var(--blue-accent); }
+        .blood-text { color: var(--text-accent); }
 
-        .btn-arrest {
-            border-color: var(--terminal-green);
-            color: var(--terminal-green);
-        }
-        
-        .btn-arrest:hover:not(:disabled) {
-            background-color: var(--terminal-green);
-            color: #000;
-        }
-
-        .blood-text {
-            color: var(--text-accent);
-        }
+        .btn-arrest { border-color: var(--terminal-green); color: var(--terminal-green); }
+        .btn-arrest:hover:not(:disabled) { background-color: var(--terminal-green); color: #000; }
     </style>
 </head>
 <body>
@@ -146,241 +145,258 @@
         <header>
             <div>
                 <h1>L.A.P.D. Terminal</h1>
-                <div style="font-size: 0.8rem; color: #666;">CASE #884-V: MOTEL 66 HOMICIDE</div>
+                <div id="case-id-display" style="font-size: 0.8rem; color: #666;">AWAITING CASE ASSIGNMENT...</div>
             </div>
             <div class="stats">
-                TIME: <span id="time-display">18</span> HRS<br>
-                FUNDS: $<span id="funds-display">300</span>
+                TIME: <span id="time-display">0</span> HRS<br>
+                FUNDS: $<span id="funds-display">0</span>
             </div>
         </header>
 
-        <div id="story-panel">
-            Initializing case file...<br><br>
-            You are Detective Miller. You've just arrived at Motel 66, Room 4. 
-            The victim is Marcus Vance, a low-level drug informant and degenerate gambler. 
-            He's lying naked on a blood-soaked bed. His throat has been opened up in a jagged smile. 
-            The smell of copper, cheap whiskey, and stale cigarette smoke is overpowering.<br><br>
-            The Captain wants this closed fast. You have 18 hours before the Feds take over, and only $300 left in your departmental discretionary fund to pay for fast-tracked lab work or grease palms.<br><br>
-            Make your choices carefully. You can't afford to do everything.
-        </div>
+        <div id="event-panel"></div>
+        <div id="story-panel">Connecting to LAPD Dispatch... Requesting new assignment.</div>
+        <div id="actions-panel"></div>
 
-        <div id="actions-panel">
-            </div>
-
-        <div class="evidence-log">
+        <div class="evidence-log" id="evidence-container" style="display:none;">
             <h3>Case Notes</h3>
-            <ul id="evidence-list">
-                <li>Victim: Marcus Vance. Found dead at Motel 66. Throat slit.</li>
-            </ul>
+            <ul id="evidence-list"></ul>
         </div>
     </div>
 
     <script>
-        // Game State
-        const state = {
-            time: 18,
-            funds: 300,
-            location: 'menu', 
-            gameover: false,
-            evidence: {
-                inspectedBody: false,
-                searchedRoom: false,
-                autopsyDone: false,
-                labDone: false,
-                bribedManager: false,
-                interrogatedWife: false,
-                interrogatedEnforcer: false,
-                interrogatedManager: false
-            }
+        // --- PROCEDURAL DATABASE ---
+        const DB = {
+            crimes: [
+                { type: "HOMICIDE", desc: "found dead with multiple gunshot wounds", lab: "Autopsy confirms time of death and extracts a 9mm slug.", warrantCost: 2 },
+                { type: "HOMICIDE", desc: "found poisoned. Throat slit post-mortem", lab: "Tox screen confirms lethal dose of cyanide before lacerations.", warrantCost: 2 },
+                { type: "BURGLARY", desc: "reporting a safe cracked and $500k in diamonds stolen", lab: "Forensics pulled a partial thumbprint off the safe dial.", warrantCost: 1 },
+                { type: "BURGLARY", desc: "reporting a break-in. High-end art was cut from the frames", lab: "Forensics found specialized micro-fibers from a tactical bag.", warrantCost: 1 },
+                { type: "SVU / ASSAULT", desc: "found drugged and sexually assaulted in an alley behind a club", lab: "Rape kit processing expedited. DNA profile isolated from the victim.", warrantCost: 2 },
+                { type: "SVU / ASSAULT", desc: "reporting a home invasion and aggravated sexual assault", lab: "Forensics recovered fluid samples and skin cells under the victim's nails.", warrantCost: 2 }
+            ],
+            victims: [
+                { name: "Marcus Vance", background: "low-level informant" },
+                { name: "Sarah Jenkins", background: "wealthy socialite" },
+                { name: "David Cho", background: "underground poker host" },
+                { name: "Elena Rostova", background: "exotic dancer" },
+                { name: "Arthur Pendelton", background: "retired judge" }
+            ],
+            suspectPool: [
+                { name: "Jax", desc: "Cartel enforcer with a violent history.", alibi: "Claims he was breaking legs across town.", clue: "9mm rounds", evidence: "Found a matching 9mm pistol in his locker." },
+                { name: "Leo", desc: "Creepy club manager known for drugging drinks.", alibi: "Claims he was doing inventory in the back.", clue: "GHB residue", evidence: "Found GHB vials and matching DNA swab in his office." },
+                { name: "Valerie", desc: "Victim's ex-wife with heavy debts.", alibi: "Claims she was at a spa out of state.", clue: "cyanide", evidence: "Found life insurance policies and cyanide in her apartment." },
+                { name: "Ghost", desc: "High-end cat burglar.", alibi: "Claims he retired two years ago.", clue: "micro-fibers", evidence: "Found the stolen goods and tactical gear in a storage unit." },
+                { name: "Trench", desc: "Known stalker with prior SVU convictions.", alibi: "Claims he was sleeping in his car.", clue: "DNA profile", evidence: "DNA matched. Found victim's belongings in his trunk." },
+                { name: "Silas", desc: "Desperate gambling addict.", alibi: "Claims he was at the track.", clue: "thumbprint", evidence: "Thumbprint matched. Found stolen diamonds fenced in his name." }
+            ]
         };
 
-        // DOM Elements
+        // --- GAME STATE ---
+        let currentCase = null;
+        let state = { time: 0, funds: 0, gameover: false, evidence: {} };
+
+        // --- DOM ELEMENTS ---
         const elTime = document.getElementById('time-display');
         const elFunds = document.getElementById('funds-display');
         const elStory = document.getElementById('story-panel');
         const elActions = document.getElementById('actions-panel');
+        const elEvContainer = document.getElementById('evidence-container');
         const elEvidence = document.getElementById('evidence-list');
+        const elEvent = document.getElementById('event-panel');
 
-        // Helper to update stats
+        // --- CORE FUNCTIONS ---
         function updateStats() {
-            elTime.innerText = state.time;
-            elFunds.innerText = state.funds;
+            elTime.innerText = Math.max(0, state.time);
+            elFunds.innerText = Math.max(0, state.funds);
         }
 
-        // Helper to add evidence to the log
-        function addEvidence(text) {
+        function logEvidence(text) {
             const li = document.createElement('li');
             li.innerHTML = text;
             elEvidence.appendChild(li);
         }
 
-        // Helper to consume resources
         function consume(timeCost, fundCost) {
             state.time -= timeCost;
             state.funds -= fundCost;
+            
+            // Random Events (20% chance)
+            if (Math.random() < 0.20 && state.time > 0) {
+                const evts = [
+                    { t: 1, f: 0, m: "Traffic gridlock on the 405. Lost 1 Hour." },
+                    { t: 0, f: 25, m: "Had to pay a CI for street whispers. Lost $25." },
+                    { t: 2, f: 0, m: "DA held you up with paperwork. Lost 2 Hours." }
+                ];
+                let e = evts[Math.floor(Math.random() * evts.length)];
+                state.time -= e.t; state.funds -= e.f;
+                elEvent.innerHTML = `>>> ALERT: ${e.m}`;
+            } else {
+                elEvent.innerHTML = "";
+            }
             updateStats();
         }
 
-        // Render standard investigation menu
-        function renderMenu(message) {
-            if (state.time <= 0 && !state.gameover) {
-                endGame("time");
-                return;
-            }
+        // --- GENERATE A NEW PROCEDURAL CASE ---
+        function generateNewCase() {
+            // Pick Crime & Victim
+            const crime = DB.crimes[Math.floor(Math.random() * DB.crimes.length)];
+            const victim = DB.victims[Math.floor(Math.random() * DB.victims.length)];
+            
+            // Pick 3 unique suspects
+            let shuffledSuspects = [...DB.suspectPool].sort(() => 0.5 - Math.random());
+            const caseSuspects = shuffledSuspects.slice(0, 3);
+            
+            // Pick 1 to be Guilty
+            const guiltySuspect = caseSuspects[Math.floor(Math.random() * caseSuspects.length)];
 
+            currentCase = {
+                id: Math.floor(Math.random() * 90000) + 10000,
+                crime: crime,
+                victim: victim,
+                suspects: caseSuspects,
+                guilty: guiltySuspect,
+                intro: `You arrive at the scene. ${victim.name}, a ${victim.background}, was ${crime.desc}. The precinct wants this closed fast. You have 24 hours and a $500 budget.`
+            };
+
+            // Reset State
+            state = {
+                time: 24, funds: 500, gameover: false,
+                evidence: { scene: false, lab: false, cyber: false, warrant: false, raid: false }
+            };
+
+            document.getElementById('case-id-display').innerText = `CASE #${currentCase.id} - ${currentCase.crime.type}`;
+            elEvContainer.style.display = 'block';
+            elEvidence.innerHTML = `<li>Victim: ${victim.name}. Crime: ${crime.type}.</li>`;
+            
+            updateStats();
+            renderMenu(currentCase.intro);
+        }
+
+        // --- MENU RENDERING ---
+        function renderMenu(message) {
+            if (state.time <= 0 && !state.gameover) { endGame("time"); return; }
             elStory.innerHTML = message;
             elActions.innerHTML = '';
 
-            // 1. Inspect Body
-            createButton('Inspect Body', 2, 0, () => {
-                state.evidence.inspectedBody = true;
-                addEvidence("Body Inspection: Defensive wounds on hands. Faint smell of expensive lavender perfume on his neck. A half-empty whiskey glass sits on the nightstand.");
-                consume(2, 0);
-                renderMenu("You put on latex gloves and examine Vance's corpse. The throat wound is horrific, jagged and deep. But you notice defensive wounds on his knuckles. Leaning in, you catch the distinct, lingering scent of expensive lavender perfume masking the stench of death. You also bag a whiskey glass from the nightstand.");
-            }, state.evidence.inspectedBody);
-
-            // 2. Search Room
-            createButton('Search Room', 3, 0, () => {
-                state.evidence.searchedRoom = true;
-                addEvidence("Room Search: Found a hidden camera in the smoke detector. Found an empty vial of liquid in the trash.");
+            // 1. Scene Investigation
+            createButton('Investigate Scene / Victim', 3, 0, () => {
+                state.evidence.scene = true;
+                logEvidence(`Scene: Traces related to ${currentCase.guilty.clue} found.`);
                 consume(3, 0);
-                renderMenu("Tearing the room apart, you find two things of interest. First, a tiny red blinking light inside the smoke detector—a hidden camera. Second, rummaging through the bathroom trash, you find a small, unlabelled glass vial with a few drops of clear liquid left inside.");
-            }, state.evidence.searchedRoom);
+                renderMenu(`You spend hours processing the scene. Amidst the chaos, forensics tags something specific pointing toward <strong>${currentCase.guilty.clue}</strong>.`);
+            }, state.evidence.scene);
 
-            // 3. Fast-Track Autopsy
-            createButton('Order Autopsy', 4, 150, () => {
-                state.evidence.autopsyDone = true;
-                addEvidence("Autopsy: Throat wound was POST-MORTEM. Actual cause of death: Potassium Cyanide poisoning. Time of death: ~1:30 AM.");
+            // 2. Lab / Forensics
+            createButton('Expedite Lab Work', 4, 150, () => {
+                state.evidence.lab = true;
+                logEvidence(`Lab: ${currentCase.crime.lab}`);
                 consume(4, 150);
-                renderMenu("You pay the Medical Examiner to skip the queue. She peels back the Y-incision and shakes her head. <br><br>'Messy, Detective. But here's the kicker—there's virtually no arterial spray at the scene, right? His lips are tinged blue, and his stomach lining is severely corroded. He was dying of Potassium Cyanide poisoning before that blade ever touched his neck. The throat slit was a cover-up.'");
-            }, state.evidence.autopsyDone);
+                renderMenu(`You bribe the lab tech to skip the queue. <br><br>"Here you go, Detective," they say. "${currentCase.crime.lab}"`);
+            }, state.evidence.lab || !state.evidence.scene, "Requires Scene Investigation");
 
-            // 4. Lab Analysis (Whiskey/Vial)
-            createButton('Lab Analysis (Vial & Glass)', 3, 100, () => {
-                state.evidence.labDone = true;
-                addEvidence("Lab Report: The whiskey glass and the vial both contained lethal doses of Potassium Cyanide.");
-                consume(3, 100);
-                renderMenu("You slip the lab tech a Benjamin to rush the tox screen. <br><br>'Nasty stuff, Miller,' the tech says. 'Both the unlabelled vial and the residue in the whiskey glass contain highly concentrated Potassium Cyanide. Someone slipped him a fatal cocktail.'");
-            }, state.evidence.labDone || !state.evidence.inspectedBody || !state.evidence.searchedRoom, 
-            (!state.evidence.inspectedBody || !state.evidence.searchedRoom) ? "(Requires Body & Room Search)" : "");
+            // 3. Cyber / Camera
+            createButton('Pull Traffic/Security Cams', 2, 50, () => {
+                state.evidence.cyber = true;
+                logEvidence(`Cyber: Suspect matching ${currentCase.guilty.name}'s description seen nearby.`);
+                consume(2, 50);
+                renderMenu(`You pay a local business for their server access. Grainy footage shows someone matching ${currentCase.guilty.name}'s physical description fleeing the area around the time of the crime.`);
+            }, state.evidence.cyber);
 
-            // 5. Interrogate: Motel Manager
-            createButton('Question Manager (Leon)', 2, 0, () => {
-                state.evidence.interrogatedManager = true;
-                consume(2, 0);
-                let text = "Leon is a sweaty, twitchy degenerate. 'I don't know nothing about no murder! I just rent the rooms by the hour!'";
-                if (state.evidence.searchedRoom) {
-                    text += "<br><br>You slam the hidden camera on the desk. He pales. 'Okay, okay! I'm a voyeur, alright? I record them. But I didn't kill him!'";
-                    if (!state.evidence.bribedManager) {
-                        text += "<br><br><em>(You can bribe him for the footage from the menu.)</em>";
+            // 4. Interrogations (Loop through suspects)
+            currentCase.suspects.forEach(suspect => {
+                const askedKey = `asked_${suspect.name}`;
+                createButton(`Question: ${suspect.name}`, 2, 0, () => {
+                    state.evidence[askedKey] = true;
+                    consume(2, 0);
+                    renderMenu(`You drag <strong>${suspect.name}</strong> into the box. (${suspect.desc})<br><br>"I didn't do it," they say. "${suspect.alibi}"`);
+                }, state.evidence[askedKey]);
+            });
+
+            // 5. Warrant & Raid (Only unlocks if you have scene + lab + cyber)
+            if (!state.evidence.warrant) {
+                createButton('<span class="sys-text">Request Search Warrant</span>', 3, 0, () => {
+                    if (state.evidence.scene && state.evidence.lab && state.evidence.cyber) {
+                        state.evidence.warrant = true;
+                        logEvidence("Warrant granted based on forensic and video probable cause.");
+                        consume(3, 0);
+                        renderMenu(`The Judge reviews your forensics, timeline, and video evidence. "Good work, Detective. Warrant granted for ${currentCase.guilty.name}'s property."`);
+                    } else {
+                        consume(3, 0);
+                        renderMenu(`The DA throws your file back. "You need Scene Evidence, Lab Reports, AND Cyber Footage to place them there, Miller! Get me probable cause!"`);
                     }
-                }
-                renderMenu(text);
-            }, state.evidence.interrogatedManager);
+                }, false, "Requires Scene, Lab & Cams");
+            } else {
+                createButton('<span class="sys-text">RAID SUSPECT PROPERTY</span>', 4, 0, () => {
+                    state.evidence.raid = true;
+                    logEvidence(`Raid: ${currentCase.guilty.evidence}`);
+                    consume(4, 0);
+                    renderMenu(`SWAT breaches the door. Tearing the place apart, you find the smoking gun: <strong>${currentCase.guilty.evidence}</strong> You have them dead to rights.`);
+                }, state.evidence.raid);
+            }
 
-            // 6. Bribe Manager for Tape
-            createButton('Bribe Manager for Tape', 1, 100, () => {
-                state.evidence.bribedManager = true;
-                addEvidence("Camera Footage: Shows Elena Vance entering Room 4 at 1:15 AM wearing a red coat. She leaves at 1:40 AM.");
-                consume(1, 100);
-                renderMenu("You shove a hundred bucks into Leon's greasy hand. He unlocks a safe and hands you a USB drive. <br><br>You boot it up on your laptop. The grainy night-vision shows a woman in a heavy coat entering Room 4 at 1:15 AM. She pours him a drink. At 1:40 AM, Vance starts convulsing. The woman calmly watches him die, then leaves. The footage cuts out before the throat is slashed.");
-            }, state.evidence.bribedManager || !state.evidence.searchedRoom, 
-            !state.evidence.searchedRoom ? "(Requires Room Search)" : "");
-
-            // 7. Interrogate: The Ex-Wife
-            createButton('Question Ex-Wife (Elena)', 3, 0, () => {
-                state.evidence.interrogatedWife = true;
-                addEvidence("Interrogation (Elena): Smells of lavender. Claims she was at a club all night. Inherits a $500k life insurance policy.");
-                consume(3, 0);
-                renderMenu("Elena Vance sits in the interrogation room, crossing her legs in a tight leather skirt. She chain-smokes, completely unbothered. <br><br>'Marcus was a deadbeat addict. I'm not shedding tears. Where was I? At a club downtown.'<br><br>As she leans in, you catch it: the distinct scent of expensive lavender perfume. A background check shows she's the sole beneficiary of a $500,000 life insurance policy.");
-            }, state.evidence.interrogatedWife);
-
-            // 8. Interrogate: Cartel Enforcer
-            createButton('Question Enforcer (Jax)', 3, 0, () => {
-                state.evidence.interrogatedEnforcer = true;
-                addEvidence("Interrogation (Jax): Known for using knives. Claims Vance owed him $50k, but denies killing him.");
-                consume(3, 0);
-                renderMenu("Jax is covered in prison ink. He's known on the streets for skinning snitches. He laughs in your face.<br><br>'Yeah, Vance owed the boss fifty grand. But think about it, Miller. We don't slit the throats of deadbeats in secret. We break their legs in public so they can still work it off. Killing him in a motel room is bad business. Whoever did it is trying to make it look like my handiwork.'");
-            }, state.evidence.interrogatedEnforcer);
-
-            // ARREST BUTTONS
-            createButton('ARREST: Leon (Manager)', 1, 0, () => arrest('Leon'), false, "", "btn-arrest");
-            createButton('ARREST: Elena (Ex-Wife)', 1, 0, () => arrest('Elena'), false, "", "btn-arrest");
-            createButton('ARREST: Jax (Enforcer)', 1, 0, () => arrest('Jax'), false, "", "btn-arrest");
+            // 6. Arrests
+            currentCase.suspects.forEach(suspect => {
+                createButton(`ARREST: ${suspect.name}`, 1, 0, () => arrest(suspect), false, "", "btn-arrest");
+            });
         }
 
         function createButton(text, timeCost, fundCost, onClick, disabled = false, extraText = "", customClass = "") {
             const btn = document.createElement('button');
             if (customClass) btn.classList.add(customClass);
-            
             let btnText = `${text}`;
             if (timeCost > 0 || fundCost > 0) {
-                btnText += `<span class="cost">`;
-                if (timeCost > 0) btnText += `-${timeCost}h `;
-                if (fundCost > 0) btnText += `-$${fundCost}`;
-                btnText += `</span>`;
+                btnText += `<span class="cost">${timeCost > 0 ? `-${timeCost}h ` : ''}${fundCost > 0 ? `-$${fundCost}` : ''}</span>`;
             }
-            if (extraText) {
-                btnText += `<br><span style="font-size:0.75rem; color:#888;">${extraText}</span>`;
-            }
-
+            if (extraText) btnText += `<br><span style="font-size:0.75rem; color:#888;">${extraText}</span>`;
             btn.innerHTML = btnText;
             btn.disabled = disabled || state.time < timeCost || state.funds < fundCost;
             btn.onclick = onClick;
             elActions.appendChild(btn);
         }
 
+        // --- ENDINGS ---
         function arrest(suspect) {
             state.gameover = true;
             elActions.innerHTML = '';
+            elEvent.innerHTML = "";
             
-            if (suspect === 'Elena') {
-                // Correct Choice
-                elStory.innerHTML = `<h2 class="blood-text">CASE CLOSED: MURDER IN THE FIRST</h2>
-                You kick down Elena's door and slap the cuffs on her. <br><br>
-                She thought she was smart. She poisoned Vance with the cyanide in the whiskey to collect the insurance money. Then, she took a jagged blade to his throat post-mortem to make it look like a cartel hit, framing Jax.<br><br>
-                The DA loves it. You closed the case, stayed under budget, and kept the Feds off your back. Time to go get a drink.`;
-            } else if (suspect === 'Jax') {
-                // Wrong Choice
-                elStory.innerHTML = `<h2 class="blood-text">CASE BOTCHED: WRONG MAN</h2>
-                You arrest Jax. He laughs as you read him his rights.<br><br>
-                The DA takes it to court, but it falls apart immediately. The autopsy (which you either didn't get, or ignored) proves Vance was poisoned first. Jax doesn't use poison. The cartel's lawyers humiliate you on the stand. <br><br>
-                Elena takes her $500,000 insurance payout and flees to a non-extradition country. You are demoted to traffic duty.`;
-            } else if (suspect === 'Leon') {
-                // Wrong Choice
-                elStory.innerHTML = `<h2 class="blood-text">CASE BOTCHED: WRONG MAN</h2>
-                You arrest Leon. He's a creep and a voyeur, but he's no killer.<br><br>
-                He cries in the interrogation room. Without a murder weapon or motive beyond "he's weird", the DA refuses to press charges. The 18-hour window closes, and the FBI takes over the case, discovering the cyanide and the insurance plot within a day.<br><br>
-                The Captain suspends you without pay.`;
+            if (suspect.name === currentCase.guilty.name) {
+                if (state.evidence.raid) {
+                    elStory.innerHTML = `<h2 class="blood-text">CASE CLOSED: AIRTIGHT CONVICTION</h2>
+                    You slap the cuffs on ${suspect.name}. Because you secured the warrant and found the hard evidence (${currentCase.guilty.evidence}), they take a plea deal immediately. You cleared a brutal ${currentCase.crime.type} off the streets.`;
+                } else {
+                    elStory.innerHTML = `<h2 class="blood-text">CASE CLOSED: MESSY PROSECUTION</h2>
+                    You arrest ${suspect.name}. They are guilty, but without raiding their property for the final piece of evidence, the defense lawyers drag it out for months. They get a reduced sentence. It's a win, but it leaves a bad taste in your mouth.`;
+                }
+            } else {
+                elStory.innerHTML = `<h2 class="blood-text">CASE BOTCHED: WRONG SUSPECT</h2>
+                You arrest ${suspect.name}, completely ignoring the evidence pointing to ${currentCase.guilty.name}. The DA drops the charges on day one. The real perpetrator flees the state. You are suspended pending an internal affairs review.`;
             }
-
-            const restartBtn = document.createElement('button');
-            restartBtn.innerText = "RESTART CASE";
-            restartBtn.style.gridColumn = "1 / -1";
-            restartBtn.onclick = () => location.reload();
-            elActions.appendChild(restartBtn);
+            createRestartBtn();
         }
 
         function endGame(reason) {
             state.gameover = true;
             elActions.innerHTML = '';
-            
-            if (reason === "time") {
-                elStory.innerHTML = `<h2 class="blood-text">TIME EXPIRED</h2>
-                Your 18 hours are up. Men in suits walk into the precinct and take your files. The FBI has officially taken over the investigation. You failed to find the killer in time. The victim is just another cold case file in a dusty cabinet.`;
-            }
-
-            const restartBtn = document.createElement('button');
-            restartBtn.innerText = "RESTART CASE";
-            restartBtn.style.gridColumn = "1 / -1";
-            restartBtn.onclick = () => location.reload();
-            elActions.appendChild(restartBtn);
+            elEvent.innerHTML = "";
+            elStory.innerHTML = `<h2 class="blood-text">TIME EXPIRED</h2>Your 24 hours are up. The Feds step in and seize your files. You failed to piece it together in time.`;
+            createRestartBtn();
         }
 
-        // Initialize Game
-        updateStats();
-        renderMenu(elStory.innerHTML);
+        function createRestartBtn() {
+            const btn = document.createElement('button');
+            btn.innerText = ">> DISPATCH: REQUEST NEW CASE";
+            btn.style.gridColumn = "1 / -1";
+            btn.style.borderColor = "var(--terminal-green)";
+            btn.style.color = "var(--terminal-green)";
+            btn.onclick = generateNewCase;
+            elActions.appendChild(btn);
+        }
 
+        // INIT
+        createButton(">> LOGIN TO DISPATCH", 0, 0, generateNewCase, false, "", "btn-arrest");
+        
     </script>
 </body>
 </html>
+          
